@@ -18,7 +18,7 @@ ARMTOOLS_URL="http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk
 #  - General rewrite, realizing that you can use last command in if directly
 
 # From the first part, the following variables are expected:
-if [ ! "$PEBBLE_HOME" ] || [ ! $SDK_URL ] || [ ! $ARMTOOLS_URL ]
+if [ ! "$PEBBLE_HOME" ] || [ ! "$SDK_URL" ] || [ ! "$ARMTOOLS_URL" ]
 then
   echo "Missing variables (can't look up where to get the SDK)"
   exit 1
