@@ -9,7 +9,7 @@ then
   exit 1
 fi
 
-PEBBLE_HOME="$HOME/pebble-dev"
+PEBBLE_HOME=${PREFIX:-"$HOME/pebble-dev"}
 SDK_URL="http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/$SDK_ZIP_NAME"
 ARMTOOLS_URL="http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk/arm-cs-tools-macos-universal-static.tar.gz"
 # This is the "actually do work" part of the script.
