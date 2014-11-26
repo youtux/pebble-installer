@@ -24,10 +24,10 @@ then
   exit 1
 fi
 
-SDK_NAME=$(echo $SDK_ZIP_NAME | rev | cut -d. -f3- | rev)
-SDK_ZIP_LOC=/tmp/$SDK_ZIP_NAME
-ARMTOOLS_ZIP_NAME=${ARMTOOLS_URL##*/}
-ARMTOOLS_ZIP_LOC=/tmp/$ARMTOOLS_ZIP_NAME
+SDK_NAME=$(basename "$SDK_ZIP_NAME" .tar.gz)
+SDK_ZIP_LOC="/tmp/$SDK_ZIP_NAME"
+ARMTOOLS_ZIP_NAME=$(basename "$ARMTOOLS_URL")
+ARMTOOLS_ZIP_LOC="/tmp/$ARMTOOLS_ZIP_NAME"
 #needs exporting for use in perl
 ADD_PEBBLE_CMD_TO_PATH="export PATH=\"$PEBBLE_HOME/PebbleSDK-current/bin:\$PATH\""
 OSX_VERSION=$(sw_vers -productVersion)
@@ -286,9 +286,9 @@ pebblesdk_unzip()
   # it's OK for this to fail if the OLD SDK isn't there
   mkdir $SDK_NAME
   _fail_if_error couldnt_unzip_sdk_mkdir "Couldn't create folder for SDK to unzip into $SDK_NAME"
-  tar -zxf $SDK_ZIP_LOC --strip-components=1 -C $SDK_NAME
+  tar -zxf "$SDK_ZIP_LOC" --strip-components=1 -C $SDK_NAME
   _fail_if_error couldnt_unzip_sdk_tar "Couldn't unzip SDK from $SDK_ZIP_NAME"
-  tar -zxf $ARMTOOLS_ZIP_LOC -C $SDK_NAME
+  tar -zxf "$ARMTOOLS_ZIP_LOC" -C $SDK_NAME
   _fail_if_error couldnt_unzip_tools "Couldn't unzip arm tools into $SDK_NAME"
 
   chmod a+x $SDK_NAME/bin/pebble
