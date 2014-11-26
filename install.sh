@@ -32,9 +32,9 @@ ARMTOOLS_ZIP_LOC="/tmp/$ARMTOOLS_ZIP_NAME"
 ADD_PEBBLE_CMD_TO_PATH="export PATH=\"$PEBBLE_HOME/PebbleSDK-current/bin:\$PATH\""
 OSX_VERSION=$(sw_vers -productVersion)
 # sample OSX_VERSION=10.8.4
-PYTHON_VERSION=$(python -c 'import sys; print(str(sys.version_info[:])[1:-1].replace(" ", ""))')
-PYTHON_MAJOR_VERSION=$(echo $PYTHON_VERSION | cut -d, -f1)
-PYTHON_MINOR_VERSION=$(echo $PYTHON_VERSION | cut -d, -f2)
+PYTHON_VERSION=$(python --version 2>&1 | cut -d" " -f2)
+PYTHON_MAJOR_VERSION=$(echo $PYTHON_VERSION | cut -d. -f1)
+PYTHON_MINOR_VERSION=$(echo $PYTHON_VERSION | cut -d. -f2)
 PYTHON2=$([ $PYTHON_MAJOR_VERSION == "2" ] && echo "python" || echo "python2")
 INSTALL_LOG="$PEBBLE_HOME/install.log"
 # sample PYTHON_VERSION=2,7,5
