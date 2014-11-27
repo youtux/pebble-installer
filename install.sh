@@ -12,6 +12,8 @@ fi
 PEBBLE_HOME=${PREFIX:-"$HOME/pebble-dev"}
 SDK_URL="http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/$SDK_ZIP_NAME"
 ARMTOOLS_URL="http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk/arm-cs-tools-macos-universal-static.tar.gz"
+SDK_SHASUM="a12e3299339c210c0948069a27fe83b20385fa34"
+ARMTOOLS_SHASUM="b1baaf455140d3c6e3a889217bb83986fe6527a0"
 # This is the "actually do work" part of the script.
 # TODO(AMK):
 #  - include version of script in analytics / errors.
@@ -252,28 +254,44 @@ by launching XCode and going through the process"
 pebblesdk_download()
 {
   _headline "Downloading SDK"
-  # actually, we only download if the user doesn't already have the latest version,
-  # using -z and -o options.
+  # actually, we only download if the file does not exists, if it is incomplete
+  # or if after the download the checksum is wrong
 
-  # cache edge case: file download stopped prematurely but file is still there,
-  # breaking the cache. keep this 'mutex-like' thing around
-  SDK_DOWNLOAD_IN_PROGRESS=/tmp/sdk_download_in_progess
-
-  if [ -e $SDK_DOWNLOAD_IN_PROGRESS ]
+  if [ ! -e "$SDK_ZIP_LOC" ] || [ ! $SDK_SHASUM = $(shasum $SDK_ZIP_LOC | cut -d " " -f 1) ]
   then
-    echo "Previous incomplete download detected - restarting"
-    rm $SDK_ZIP_LOC $ARMTOOLS_ZIP_LOC
-  else
-    touch $SDK_DOWNLOAD_IN_PROGRESS
+    echo "Need to download $SDK_ZIP_NAME"
+
+    curl -o "$SDK_ZIP_LOC" -C - -fSL "$SDK_URL"
+    _fail_if_error no_sdk_download "Couldn't download SDK from $SDK_URL."
+
+    if [ ! $SDK_SHASUM = $(shasum $SDK_ZIP_LOC | cut -d " " -f 1) ]
+    then
+      echo "Checksum mismatch for $SDK_ZIP_NAME - restarting"
+
+      rm "$SDK_ZIP_LOC"
+      curl -o "$SDK_ZIP_LOC" -fSL "$SDK_URL"
+      _fail_if_error no_sdk_download "Couldn't download SDK from $SDK_URL."
+    fi
   fi
 
-  curl -z $SDK_ZIP_LOC -o $SDK_ZIP_LOC -fSL $SDK_URL
-  _fail_if_error no_sdk_download "Couldn't download SDK from $SDK_URL."
-  curl -z $ARMTOOLS_ZIP_LOC -o $ARMTOOLS_ZIP_LOC -fSL $ARMTOOLS_URL
-  _fail_if_error no_armtools_download "Couldn't download ARM TOOLS from $ARMTOOLS_URL."
+  if [ ! -e "$ARMTOOLS_ZIP_LOC" ] || [ ! $ARMTOOLS_SHASUM = $(shasum $ARMTOOLS_ZIP_LOC | cut -d " " -f 1) ]
+  then
+    echo "Need to download $ARMTOOLS_ZIP_NAME"
+
+    curl -o "$ARMTOOLS_ZIP_LOC" -C - -fSL "$ARMTOOLS_URL"
+    _fail_if_error no_armtools_download "Couldn't download ARM TOOLS from $ARMTOOLS_URL."
+
+    if [ ! $ARMTOOLS_SHASUM = $(shasum $ARMTOOLS_ZIP_LOC | cut -d " " -f 1) ]
+    then
+      echo "Checksum mismatch for $ARMTOOLS_ZIP_NAME - restarting"
+      
+      rm "$ARMTOOLS_ZIP_LOC"
+      curl -o "$ARMTOOLS_ZIP_LOC" -fSL "$ARMTOOLS_URL"
+      _fail_if_error no_armtools_download "Couldn't download ARM TOOLS from $ARMTOOLS_URL."
+    fi
+  fi
 
   echo "SDK download complete."
-  rm $SDK_DOWNLOAD_IN_PROGRESS
 }
 
 pebblesdk_unzip()
